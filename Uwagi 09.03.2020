@@ -1,0 +1,7 @@
+Działanie chwytaka i osobny automat dla końcówki robota
+Uwzględnienie róznych ruchów robota dla różnych zadań
+Nazwanie kroków
+Dodanie stanów awaryjnych
+Połączenie automatów i synchronizacja pracy (bezczynność)
+Połączenie automatu platformy i robota (platforma jako dodatkowy stopień swobody)
+
