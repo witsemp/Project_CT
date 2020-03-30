@@ -1,4 +1,6 @@
 from statemachine import StateMachine, State
+import time
+
 class RobotPlatform(StateMachine):
     #List of states
     Robot_Idle = State("Waiting to begin sequence", initial=True)
@@ -30,18 +32,101 @@ class RobotPlatform(StateMachine):
 
     def on_wood_detected(self):
         print('Wood detected, lowering arm to pickup wood')
+        time.sleep(1)
     def on_manipulator_lowered_to_pickup(self):
         print('Manipulator lowered')
+        time.sleep(1)
     def on_gripper_activated(self):
         print('Manipulator lifted with wood')
+        time.sleep(1)
     def on_manipulator_lowered_to_place(self):
         print('Manipulator lowered to place')
+        time.sleep(1)
     def on_rotated_endswitch_2(self):
         print("Manipulator rotated, platform at endswitch 2")
+        time.sleep(1)
     def on_gripper_deactivated(self):
         print('Suction cups deactivated')
+        time.sleep(1)
     def on_manipulator_lifted_wo_wood(self):
         print('Manipulator in upper position, without wood')
+        time.sleep(1)
     def on_rotated_endswitch_1(self):
         print('Manipulator rotated, platform at endswitch 1')
+        time.sleep(1)
+    def on_endswitch2_no_confirmation(self):
+        print("Awaiting confirmation from endswitch 2")
+        time.sleep(1)
+    def on_endswitch1_no_confirmation(self):
+        print("Awaiting confirmation from endswitch 1")
+        time.sleep(1)
+    def on_endswitch2_error(self):
+        print("No confirmation from endswitch 2")
+        time.sleep(1)
+    def on_endswitch1_error(self):
+        print("No confirmation from endswitch 1")
+        time.sleep(1)
+    def on_endswitch_error_confirmed(self):
+        n=input("Endswitch repair and confirmation needed (y - confirm maintenance")
+        if n == "y":
+            print("Maintenance confirmed")
+        time.sleep(1)
+    def process(self):
+        counter = 0
+        if counter == 0:
+            n = input("Repeat sequence? (y/n) ")
+            if n == "y":
+                self.wood_detected()
+                counter = 10
+        if counter == 10:
+            self.manipulator_lowered_to_pickup()
+            counter = 20
+        if counter == 20:
+            self.gripper_activated()
+            counter = 30
+        if counter == 30:
+            self.manipulator_lifted_w_wood()
+            counter = 40
+        while counter == 40:
+            n = input("Platform at endswitch 2? (y/n/e)")
+            if n == "y":
+                self.rotated_endswitch_2()
+                counter = 50
+            if n == "n":
+                self.endswitch2_no_confirmation()
+                counter = 40
+            if n == "e":
+                self.endswitch2_error()
+                counter = 90
+        if counter == 50:
+            self.manipulator_lowered_to_place()
+            counter = 60
+        if counter == 60:
+            self.gripper_deactivated()
+            counter = 70
+        if counter == 70:
+            self.manipulator_lifted_wo_wood()
+            counter = 80
+        while counter == 80:
+            n = input("Platform at endswitch 1? (y/n/e)")
+            if n == "y":
+                self.rotated_endswitch_1()
+                counter = 0
+            if n == "n":
+                self.endswitch1_no_confirmation()
+                counter = 80
+            if n == "e":
+                self.endswitch1_error()
+                counter = 90
+        if counter == 90:
+            self.endswitch_error_confirmed()
+            counter = 0
+
+
+
+
+
+
+
+
 
