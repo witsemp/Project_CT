@@ -27,7 +27,8 @@ class WoodGripper(StateMachine):
     tray_blocked_hiding = Slide_Out_Tray.to(Emergency_Hiding)
     tray_unlocked_hiding = Emergency_Hiding.to(Slide_Out_Tray)
     #Emergency transitions
-    pressure_failure = Activate_Pressure.to(Emergency_Pressure)
+    pressure_failure_1 = Activate_Pressure.to(Emergency_Pressure)
+    pressure_failure_2 = Activate_Pressure.to(Emergency_Pressure)
     gripper_error_handled = Emergency_Pressure.to(Gripper_Idle)
 
 
@@ -52,22 +53,26 @@ class WoodGripper(StateMachine):
     def on_tray_blocked_extending(self):
         print ('Tray blocked, attempting to unlock')
         time.sleep(1)
-    def on_pressure_failure(self):
+    def on_pressure_failure1(self):
         print('Insufficient pressure, manual maintenance required')
-        n = input("Confirm pressure circuit maintanance (y): ")
-        if n == "y":
-            print('Pressure maintenance confirmed')
+        time.sleep(1)
+    def on_pressure_failure2(self):
+        print('Insufficient pressure, manual maintenance required')
         time.sleep(1)
     def on_tray_blocked_hiding(self):
         print('Hiding tray unsuccessful, attempting to unlock')
         time.sleep(1)
     def on_gripper_error_handled(self):
-        print('Manual maintenance confirmed')
+        n = input("Confirm pressure circuit maintanance (y): ")
+        if n == "y":
+            print('Pressure maintenance confirmed')
         time.sleep(1)
     def process(self):
         if (cycleMatrix[0] == False and cycleMatrix[1] == False and cycleMatrix[2] == False and cycleMatrix[3] == False and cycleMatrix[4] == False and cycleMatrix[5] == False and cycleMatrix[6] == False):
-            self.position1_manipulator_lowered()
-            cycleMatrix[0] = True
+            n = input("Repeat sequence? (y/n) ")
+            if n == "y":
+                self.position1_manipulator_lowered()
+                cycleMatrix[0] = True
 
         if (cycleMatrix[0] == True and cycleMatrix[1] == False and cycleMatrix[2] == False and cycleMatrix[3] == False and cycleMatrix[4] == False and cycleMatrix[5] == False and cycleMatrix[6] == False):
             n = input("Choose tray behavior: (a - tray extended correctly, b - tray blocked while extending) ")
@@ -81,16 +86,26 @@ class WoodGripper(StateMachine):
                 cycleMatrix[0] = True
 
         if (cycleMatrix[0] == False and cycleMatrix[1] == True and cycleMatrix[2] == False and cycleMatrix[3] == False and cycleMatrix[4] == False and cycleMatrix[5] == False and cycleMatrix[6] == False):
-            self.pressure_applied()
-            cycleMatrix[1] = False
-            cycleMatrix[2] = True
-
+            n = input("Pressure circuit status: (a - correct, b - fault) ")
+            if n == "a":
+                self.pressure_applied()
+                cycleMatrix[1] = False
+                cycleMatrix[2] = True
+            if n == "b":
+                self.pressure_failure_1()
+                cycleMatrix[0] = True
+                cycleMatrix[1] = True
 
         if (cycleMatrix[0] == False and cycleMatrix[1] == False and cycleMatrix[2] == True and cycleMatrix[3] == False and cycleMatrix[4] == False and cycleMatrix[5] == False and cycleMatrix[6] == False):
-            self.position2_ready_to_place()
-            cycleMatrix[2] = False
-            cycleMatrix[3] = True
-
+            n = input("Pressure circuit status after picking wood: (a - correct, b - fault) ")
+            if n == "a":
+                self.position2_ready_to_place()
+                cycleMatrix[2] = False
+                cycleMatrix[3] = True
+            if n == "b":
+                self.pressure_failure_1()
+                cycleMatrix[0] = True
+                cycleMatrix[1] = True
 
         if (cycleMatrix[0] == False and cycleMatrix[1] == False and cycleMatrix[2] == False and cycleMatrix[3] == True and cycleMatrix[4] == False and cycleMatrix[5] == False and cycleMatrix[6] == False):
             self.pressure_deactivated()
@@ -109,16 +124,7 @@ class WoodGripper(StateMachine):
                 cycleMatrix[4] = True
 
 
-
-
-        '''
-        if (cycleMatrix[0] == False and cycleMatrix[1] == False and cycleMatrix[2] == False and cycleMatrix[3] == False and cycleMatrix[4] == False and cycleMatrix[5] == True and cycleMatrix[6] == False):
-            self.on_tray_extended()
-            cycleMatrix[6] = True
-            cycleMatrix[5] = False
-        '''
-        '''
-        if (cycleMatrix[0] == False and cycleMatrix[1] == False and cycleMatrix[2] == False and cycleMatrix[3] == False and cycleMatrix[4] == False and cycleMatrix[5] == False and cycleMatrix[6] == True):
-            self.on_tray_extended()
-            cycleMatrix[6] = False
-        '''
+        if (cycleMatrix[0] == True and cycleMatrix[1] == True and cycleMatrix[2] == False and cycleMatrix[3] == False and cycleMatrix[4] == False and cycleMatrix[5] == False and cycleMatrix[6] == False):
+            self.gripper_error_handled()
+            cycleMatrix[0] = False
+            cycleMatrix[1] = False
