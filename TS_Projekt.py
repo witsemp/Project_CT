@@ -13,6 +13,7 @@ while True:
     if n == "y":
         # robot_platform.process()
         # wood_gripper.process()
-        supervisor.test_cycle()
+        #supervisor.test_cycle()
+        supervisor.real_deal()
     if n == "n":
         break

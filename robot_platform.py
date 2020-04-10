@@ -30,6 +30,8 @@ class RobotPlatform(StateMachine):
     endswitch1_error = Rotation_II_Moving_To_E1.to(Endswitch_Error)
     endswitch_error_confirmed = Endswitch_Error.to(Robot_Idle)
 
+    gripper_error = Gripper_Activation.to(Robot_Idle)
+
     def on_wood_detected(self):
         print('Wood detected, lowering arm to pickup wood ')
         time.sleep(1)
@@ -71,6 +73,11 @@ class RobotPlatform(StateMachine):
         if n == "y":
             print("Maintenance confirmed ")
         time.sleep(1)
+
+    def on_gripper_error(self):
+        print("Restart robot because of gripper error")
+        time.sleep(1)
+
     def process(self):
         counter = 0
         if counter == 0:

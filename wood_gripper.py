@@ -30,7 +30,7 @@ class WoodGripper(StateMachine):
     pressure_failure_1 = Activate_Pressure.to(Emergency_Pressure)
     pressure_failure_2 = Gripping_Wood.to(Emergency_Pressure)
     gripper_error_handled = Emergency_Pressure.to(Gripper_Idle)
-
+    robot_failure = Gripping_Wood.to(Gripper_Idle)
 
     def on_position1_manipulator_lowered(self):
         print ('Transporter at endswitch 1, manipulator ready to pick up wood')
@@ -67,6 +67,13 @@ class WoodGripper(StateMachine):
         if n == "y":
             print('Pressure maintenance confirmed ')
         time.sleep(1)
+
+
+    def on_robot_failure(self):
+        print("Restart gripper because of robot error")
+        time.sleep(1)
+
+
     def process(self):
         licznik = 0
 
