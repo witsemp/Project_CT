@@ -30,43 +30,50 @@ class WoodGripper(StateMachine):
     pressure_failure_1 = Activate_Pressure.to(Emergency_Pressure)
     pressure_failure_2 = Gripping_Wood.to(Emergency_Pressure)
     gripper_error_handled = Emergency_Pressure.to(Gripper_Idle)
-
+    robot_failure = Gripping_Wood.to(Gripper_Idle)
 
     def on_position1_manipulator_lowered(self):
-        print ('Transporter at endswitch 1, manipulator ready to pick up wood')
+        print ('G: Transporter at endswitch 1, manipulator ready to pick up wood')
         time.sleep(1)
     def on_tray_extended(self):
-        print ('Tray fully extended')
+        print ('G: Tray fully extended')
         time.sleep(1)
     def on_pressured_applied(self):
-        print ('Suction cups gripping wood')
+        print ('G: Suction cups gripping wood')
         time.sleep(1)
     def on_position2_ready_to_place(self):
-        print ('Transporter at endswitch 2, manipulator ready to place wood')
+        print ('G: Transporter at endswitch 2, manipulator ready to place wood')
         time.sleep(1)
     def on_pressure_deactivated(self):
-        print ('Pressure deactivated, suction cups lifted ')
+        print ('G: Pressure deactivated, suction cups lifted ')
         time.sleep(1)
     def on_tray_hidden(self):
-        print ('Tray hidden successfully ')
+        print ('G: Tray hidden successfully ')
         time.sleep(1)
     def on_tray_blocked_extending(self):
-        print ('Tray blocked, attempting to unlock ')
+        print ('G: Tray blocked, attempting to unlock ')
         time.sleep(1)
     def on_pressure_failure1(self):
-        print('Insufficient pressure, manual maintenance required ')
+        print('G: Insufficient pressure, manual maintenance required ')
         time.sleep(1)
     def on_pressure_failure2(self):
-        print('Insufficient pressure, manual maintenance required ')
+        print('G: Insufficient pressure, manual maintenance required ')
         time.sleep(1)
     def on_tray_blocked_hiding(self):
-        print('Hiding tray unsuccessful, attempting to unlock ')
+        print('G: Hiding tray unsuccessful, attempting to unlock ')
         time.sleep(1)
     def on_gripper_error_handled(self):
-        n = input("Confirm pressure circuit maintanance (y): ")
+        n = input("G: Confirm pressure circuit maintanance (y): ")
         if n == "y":
-            print('Pressure maintenance confirmed ')
+            print('G: Pressure maintenance confirmed ')
         time.sleep(1)
+
+
+    def on_robot_failure(self):
+        print("G: Restart gripper because of robot error")
+        time.sleep(1)
+
+
     def process(self):
         licznik = 0
 
@@ -75,7 +82,7 @@ class WoodGripper(StateMachine):
             licznik = 1
 
         while licznik == 1:
-            n = input("Choose tray behavior: (a - tray extended correctly, b - tray blocked while extending): ")
+            n = input("G: Choose tray behavior: (a - tray extended correctly, b - tray blocked while extending): ")
             if n == 'a':
                 self.tray_extended()
                 licznik = 2
