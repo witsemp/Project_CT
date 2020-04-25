@@ -2,6 +2,9 @@ from statemachine import StateMachine, State
 from robot_platform import RobotPlatform
 from wood_gripper import WoodGripper
 import time
+import numpy as np
+import networkx as nx
+import matplotlib.pyplot as plt
 
 class Supervisor(StateMachine):
     # Elements to supervise
@@ -30,12 +33,12 @@ class Supervisor(StateMachine):
 
     # Processes definitions
     def on_pick_up_wood(self):
-        print("S: Pick it up!!!")
+        print("Pick it up!!!")
         self.__robot_platform.wood_detected()
         self.__robot_platform.manipulator_lowered_to_pickup()
         self.__wood_gripper.position1_manipulator_lowered()
         while 1:
-            n = input("G: Choose tray behavior: (a - tray extended correctly, b - tray blocked while extending): ")
+            n = input("Choose tray behavior: (a - tray extended correctly, b - tray blocked while extending): ")
             if n == 'a':
                 self.__wood_gripper.tray_extended()
                 break
@@ -43,7 +46,7 @@ class Supervisor(StateMachine):
                 self.__wood_gripper.tray_blocked_extending()
                 self.__wood_gripper.tray_unlocked_extending()
         while 1:
-            n = input("G: Pressure circuit status: (a - correct, b - fault): ")
+            n = input("Pressure circuit status: (a - correct, b - fault): ")
             if n == "a":
                 self.__wood_gripper.pressure_applied()
                 break
@@ -52,7 +55,7 @@ class Supervisor(StateMachine):
                 self.__wood_gripper.pressure_failure_1()
                 break
         if not self.need_restart_gripper:
-            self.__robot_platform.gripper_activated()
+            self.__robot_platform.gripper_activated();
             self.__robot_platform.manipulator_lifted_w_wood()
         else:
             self.__wood_gripper.gripper_error_handled()
@@ -60,9 +63,9 @@ class Supervisor(StateMachine):
 
 
     def on_ride_to_drop(self):
-        print("S: Heading to a drop zone")
+        print("Heading to a drop zone")
         while 1:
-            n = input("R: Platform at endswitch 2? (y/n/e): ")
+            n = input("Platform at endswitch 2? (y/n/e): ")
             if n == "y":
                 self.__robot_platform.rotated_endswitch_2()
                 break
@@ -76,24 +79,24 @@ class Supervisor(StateMachine):
 
 
     def on_restart_pressure(self):
-        print("S: Going idle after pressure error")
+        print("Going idle after pressure error")
         time.sleep(1)
 
 
     def on_restart_robot_1(self):
-        print("S: Going idle because of robot failure")
+        print("Going idle because of robot failure")
         self.__robot_platform.endswitch_error_confirmed()
         time.sleep(1)
 
 
     def on_drop_wood(self):
-        print("S: Drop this wood now!!!")
+        print("Drop this wood now!!!")
         self.__robot_platform.manipulator_lowered_to_place()
         self.__wood_gripper.position2_ready_to_place()
         self.__robot_platform.gripper_deactivated()
         self.__wood_gripper.pressure_deactivated()
         while 1:
-            n = input("G: Choose tray behavior: (a - tray hidden successfully, b - tray blocked while hiding): ")
+            n = input("Choose tray behavior: (a - tray hidden successfully, b - tray blocked while hiding): ")
             if (n == 'a'):
                 self.__wood_gripper.tray_hidden()
                 break
@@ -104,9 +107,9 @@ class Supervisor(StateMachine):
 
 
     def on_ride_back(self):
-        print("S: Going back to start")
+        print("Going back to start")
         while 1:
-            n = input("R: Platform at endswitch 1? (y/n/e): ")
+            n = input("Platform at endswitch 1? (y/n/e): ")
             if n == "y":
                 self.__robot_platform.rotated_endswitch_1()
                 break
@@ -121,24 +124,24 @@ class Supervisor(StateMachine):
 
     def on_stop_cycle(self):
         if self.need_restart_robot_2:
-            print("S: Going idle because of robot failure")
+            print("Going idle because of robot failure")
             self.__robot_platform.endswitch_error_confirmed()
         else:
-            print("S: End of work, give me paycheck")
+            print("End of work, give me paycheck")
         time.sleep(1)
 
 
     def test_cycle(self):
         while 1:
-            key = input("S: Want to start cycle? y/n")
+            key = input("Want to start cycle? y/n")
             if key == "y":
                 self.pick_up_wood()
                 break
             elif key == "n":
-                print("S: Come back later \n zzzZZZ...")
+                print("Come back later \n zzzZZZ...")
                 time.sleep(4)
             else:
-                print("S: That's not an answer to my question!!!")
+                print("That's not an answer to my question!!!")
                 time.sleep(2)
         time.sleep(2)
         self.ride_to_drop()
@@ -153,15 +156,15 @@ class Supervisor(StateMachine):
         self.need_restart_gripper = self.need_restart_robot_1 = self.need_restart_robot_2 = False
         # start cycle
         while 1:
-            key = input("S: Want to start cycle? y/n")
+            key = input("Want to start cycle? y/n")
             if key == "y":
                 self.pick_up_wood()
                 break
             elif key == "n":
-                print("S: Come back later \n zzzZZZ...")
+                print("Come back later \n zzzZZZ...")
                 time.sleep(4)
             else:
-                print("S: That's not an answer to my question!!!")
+                print("That's not an answer to my question!!!")
                 time.sleep(2)
         if self.need_restart_gripper:
             self.restart_pressure()
@@ -173,7 +176,23 @@ class Supervisor(StateMachine):
                 self.drop_wood()
                 self.ride_back()
                 self.stop_cycle()
-
-
+    def draw(self):
+        n = []
+        edges = []
+        G = nx.DiGraph()
+        states = self.__robot_platform.states
+        for state in states:
+            n.append(state.value)
+        transitions = self.__robot_platform.transitions
+        for transition in transitions:
+            for dests in transition.destinations:
+                edges.append([transition.source.value, dests.value])
+        print(n)
+        print(edges)
+        G.add_nodes_from(n)
+        G.add_edges_from(edges)
+        nx.draw(G, with_labels=True, font_weight='bold')
+        plt.savefig("simple_path.png")
+        plt.show()
 
 
