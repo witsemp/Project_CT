@@ -33,49 +33,49 @@ class RobotPlatform(StateMachine):
     gripper_error = Gripper_Activation.to(Robot_Idle)
 
     def on_wood_detected(self):
-        print('Wood detected, lowering arm to pickup wood ')
+        print('R: Wood detected, lowering arm to pickup wood ')
         time.sleep(1)
     def on_manipulator_lowered_to_pickup(self):
-        print('Manipulator lowered ')
+        print('R: Manipulator lowered ')
         time.sleep(1)
     def on_gripper_activated(self):
-        print('Manipulator lifted with wood ')
+        print('R: Manipulator lifted with wood ')
         time.sleep(1)
     def on_manipulator_lowered_to_place(self):
-        print('Manipulator lowered to place ')
+        print('R: Manipulator lowered to place ')
         time.sleep(1)
     def on_rotated_endswitch_2(self):
-        print("Manipulator rotated, platform at endswitch 2 ")
+        print("R: Manipulator rotated, platform at endswitch 2 ")
         time.sleep(1)
     def on_gripper_deactivated(self):
-        print('Suction cups deactivated')
+        print('R: Suction cups deactivated')
         time.sleep(1)
     def on_manipulator_lifted_wo_wood(self):
-        print('Manipulator in upper position, without wood ')
+        print('R: Manipulator in upper position, without wood ')
         time.sleep(1)
     def on_rotated_endswitch_1(self):
-        print('Manipulator rotated, platform at endswitch 1 ')
+        print('R: Manipulator rotated, platform at endswitch 1 ')
         time.sleep(1)
     def on_endswitch2_no_confirmation(self):
-        print("Awaiting confirmation from endswitch 2 ")
+        print("R: Awaiting confirmation from endswitch 2 ")
         time.sleep(1)
     def on_endswitch1_no_confirmation(self):
-        print("Awaiting confirmation from endswitch 1 ")
+        print("R: Awaiting confirmation from endswitch 1 ")
         time.sleep(1)
     def on_endswitch2_error(self):
-        print("No confirmation from endswitch 2 ")
+        print("R: No confirmation from endswitch 2 ")
         time.sleep(1)
     def on_endswitch1_error(self):
-        print("No confirmation from endswitch 1 ")
+        print("R: No confirmation from endswitch 1 ")
         time.sleep(1)
     def on_endswitch_error_confirmed(self):
-        n=input("Endswitch repair and confirmation needed (y) - confirm maintenance: ")
+        n=input("R: Endswitch repair and confirmation needed (y) - confirm maintenance: ")
         if n == "y":
-            print("Maintenance confirmed ")
+            print("R: Maintenance confirmed ")
         time.sleep(1)
 
     def on_gripper_error(self):
-        print("Restart robot because of gripper error")
+        print("R: Restart robot because of gripper error")
         time.sleep(1)
 
     def process(self):

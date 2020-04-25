@@ -30,12 +30,12 @@ class Supervisor(StateMachine):
 
     # Processes definitions
     def on_pick_up_wood(self):
-        print("Pick it up!!!")
-        self.__robot_platform.on_wood_detected()
-        self.__robot_platform.on_manipulator_lowered_to_pickup()
-        self.__wood_gripper.on_position1_manipulator_lowered()
+        print("S: Pick it up!!!")
+        self.__robot_platform.wood_detected()
+        self.__robot_platform.manipulator_lowered_to_pickup()
+        self.__wood_gripper.position1_manipulator_lowered()
         while 1:
-            n = input("Choose tray behavior: (a - tray extended correctly, b - tray blocked while extending): ")
+            n = input("G: Choose tray behavior: (a - tray extended correctly, b - tray blocked while extending): ")
             if n == 'a':
                 self.__wood_gripper.tray_extended()
                 break
@@ -43,7 +43,7 @@ class Supervisor(StateMachine):
                 self.__wood_gripper.tray_blocked_extending()
                 self.__wood_gripper.tray_unlocked_extending()
         while 1:
-            n = input("Pressure circuit status: (a - correct, b - fault): ")
+            n = input("G: Pressure circuit status: (a - correct, b - fault): ")
             if n == "a":
                 self.__wood_gripper.pressure_applied()
                 break
@@ -52,17 +52,17 @@ class Supervisor(StateMachine):
                 self.__wood_gripper.pressure_failure_1()
                 break
         if not self.need_restart_gripper:
-            self.__robot_platform.gripper_activated();
-            self.__robot_platform.self.manipulator_lifted_w_wood()
+            self.__robot_platform.gripper_activated()
+            self.__robot_platform.manipulator_lifted_w_wood()
         else:
             self.__wood_gripper.gripper_error_handled()
             self.__robot_platform.gripper_error()
 
 
     def on_ride_to_drop(self):
-        print("Heading to a drop zone")
+        print("S: Heading to a drop zone")
         while 1:
-            n = input("Platform at endswitch 2? (y/n/e): ")
+            n = input("R: Platform at endswitch 2? (y/n/e): ")
             if n == "y":
                 self.__robot_platform.rotated_endswitch_2()
                 break
@@ -76,44 +76,44 @@ class Supervisor(StateMachine):
 
 
     def on_restart_pressure(self):
-        print("Going idle after pressure error")
+        print("S: Going idle after pressure error")
         time.sleep(1)
 
 
     def on_restart_robot_1(self):
-        print("Going idle because of robot failure")
+        print("S: Going idle because of robot failure")
         self.__robot_platform.endswitch_error_confirmed()
         time.sleep(1)
 
 
     def on_drop_wood(self):
-        print("Drop this wood now!!!")
+        print("S: Drop this wood now!!!")
         self.__robot_platform.manipulator_lowered_to_place()
         self.__wood_gripper.position2_ready_to_place()
         self.__robot_platform.gripper_deactivated()
         self.__wood_gripper.pressure_deactivated()
         while 1:
-            n = input("Choose tray behavior: (a - tray hidden successfully, b - tray blocked while hiding): ")
+            n = input("G: Choose tray behavior: (a - tray hidden successfully, b - tray blocked while hiding): ")
             if (n == 'a'):
-                self.tray_hidden()
+                self.__wood_gripper.tray_hidden()
                 break
             if (n == 'b'):
-                self.tray_blocked_hiding()
-                self.tray_unlocked_hiding()
-        self.manipulator_lifted_wo_wood()
+                self.__wood_gripper.tray_blocked_hiding()
+                self.__wood_gripper.tray_unlocked_hiding()
+        self.__robot_platform.manipulator_lifted_wo_wood()
 
 
     def on_ride_back(self):
-        print("Going back to start")
+        print("S: Going back to start")
         while 1:
-            n = input("Platform at endswitch 1? (y/n/e): ")
+            n = input("R: Platform at endswitch 1? (y/n/e): ")
             if n == "y":
-                self.rotated_endswitch_1()
+                self.__robot_platform.rotated_endswitch_1()
                 break
             if n == "n":
-                self.endswitch1_no_confirmation()
+                self.__robot_platform.endswitch1_no_confirmation()
             if n == "e":
-                self.endswitch1_error()
+                self.__robot_platform.endswitch1_error()
                 self.need_restart_robot_2 = True
                 break
         time.sleep(1)
@@ -121,24 +121,24 @@ class Supervisor(StateMachine):
 
     def on_stop_cycle(self):
         if self.need_restart_robot_2:
-            print("Going idle because of robot failure")
+            print("S: Going idle because of robot failure")
             self.__robot_platform.endswitch_error_confirmed()
         else:
-            print("End of work, give me paycheck")
+            print("S: End of work, give me paycheck")
         time.sleep(1)
 
 
     def test_cycle(self):
         while 1:
-            key = input("Want to start cycle? y/n")
+            key = input("S: Want to start cycle? y/n")
             if key == "y":
                 self.pick_up_wood()
                 break
             elif key == "n":
-                print("Come back later \n zzzZZZ...")
+                print("S: Come back later \n zzzZZZ...")
                 time.sleep(4)
             else:
-                print("That's not an answer to my question!!!")
+                print("S: That's not an answer to my question!!!")
                 time.sleep(2)
         time.sleep(2)
         self.ride_to_drop()
@@ -153,15 +153,15 @@ class Supervisor(StateMachine):
         self.need_restart_gripper = self.need_restart_robot_1 = self.need_restart_robot_2 = False
         # start cycle
         while 1:
-            key = input("Want to start cycle? y/n")
+            key = input("S: Want to start cycle? y/n")
             if key == "y":
                 self.pick_up_wood()
                 break
             elif key == "n":
-                print("Come back later \n zzzZZZ...")
+                print("S: Come back later \n zzzZZZ...")
                 time.sleep(4)
             else:
-                print("That's not an answer to my question!!!")
+                print("S: That's not an answer to my question!!!")
                 time.sleep(2)
         if self.need_restart_gripper:
             self.restart_pressure()
