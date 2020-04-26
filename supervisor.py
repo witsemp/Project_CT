@@ -176,23 +176,59 @@ class Supervisor(StateMachine):
                 self.drop_wood()
                 self.ride_back()
                 self.stop_cycle()
-    def draw(self):
-        n = []
-        edges = []
+    def draw_gripper_graph(self):
+        nodes_gripper = []
+        edges_gripper = []
+        G = nx.DiGraph()
+        states = self.__wood_gripper.states
+        for state in states:
+            nodes_gripper.append(state.value)
+        transitions = self.__wood_gripper.transitions
+        for transition in transitions:
+            for dests in transition.destinations:
+                edges_gripper.append([transition.source.value, dests.value])
+        print(nodes_gripper)
+        print(edges_gripper)
+        G.add_nodes_from(nodes_gripper)
+        G.add_edges_from(edges_gripper)
+        nx.draw(G, with_labels=True, font_weight='bold')
+        #plt.savefig("simple_path.png")
+        plt.show()
+    def draw_robot_graph(self):
+        nodes_robot = []
+        edges_robot = []
         G = nx.DiGraph()
         states = self.__robot_platform.states
         for state in states:
-            n.append(state.value)
+            nodes_robot.append(state.value)
         transitions = self.__robot_platform.transitions
         for transition in transitions:
             for dests in transition.destinations:
-                edges.append([transition.source.value, dests.value])
-        print(n)
-        print(edges)
-        G.add_nodes_from(n)
-        G.add_edges_from(edges)
+                edges_robot.append([transition.source.value, dests.value])
+        print(nodes_robot)
+        print(edges_robot)
+        G.add_nodes_from(nodes_robot)
+        G.add_edges_from(edges_robot)
         nx.draw(G, with_labels=True, font_weight='bold')
-        plt.savefig("simple_path.png")
+        #plt.savefig("simple_path.png")
+        plt.show()
+    def draw_supervisor_graph(self):
+        nodes_supervisor = []
+        edges_supervisor = []
+        G = nx.DiGraph()
+        states = self.states
+        for state in states:
+            nodes_supervisor.append(state.value)
+        transitions = self.transitions
+        for transition in transitions:
+            for dests in transition.destinations:
+                edges_supervisor.append([transition.source.value, dests.value])
+        print(nodes_supervisor)
+        print(edges_supervisor)
+        G.add_nodes_from(nodes_supervisor)
+        G.add_edges_from(edges_supervisor)
+        nx.draw(G, with_labels=True, font_weight='bold')
+        #plt.savefig("simple_path.png")
         plt.show()
 
 
