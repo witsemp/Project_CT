@@ -7,15 +7,16 @@ import time
 wood_gripper = WoodGripper()
 robot_platform = RobotPlatform()
 supervisor = Supervisor()
-# S: message from supervisor
-# G: message from wood gripper
-# R: message from robot platform
+
 while True:
     n = input("Start new sequence? (y/n) ")
     if n == "y":
         # robot_platform.process()
         # wood_gripper.process()
         #supervisor.test_cycle()
-        supervisor.real_deal()
+        #supervisor.real_deal()
+        supervisor.draw_robot_graph()
+        supervisor.draw_gripper_graph()
+        supervisor.draw_supervisor_graph()
     if n == "n":
         break
