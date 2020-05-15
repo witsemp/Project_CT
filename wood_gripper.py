@@ -1,8 +1,11 @@
 from statemachine import StateMachine, State
 import time
+import networkx as nx
+import matplotlib.pyplot as plt
+
 cycleMatrix = [False, False, False, False, False, False, False]
 class WoodGripper(StateMachine):
-
+    __graph = nx.MultiDiGraph()
     #List of states
     Gripper_Idle = State("Waiting to begin sequence", initial=True)
     Slide_In_Tray = State("Extending gripper tray")
@@ -33,46 +36,44 @@ class WoodGripper(StateMachine):
     robot_failure = Gripping_Wood.to(Gripper_Idle)
 
     def on_position1_manipulator_lowered(self):
-        print ('G: Transporter at endswitch 1, manipulator ready to pick up wood')
+        print ('Transporter at endswitch 1, manipulator ready to pick up wood')
         time.sleep(1)
     def on_tray_extended(self):
-        print ('G: Tray fully extended')
+        print ('Tray fully extended')
         time.sleep(1)
     def on_pressured_applied(self):
-        print ('G: Suction cups gripping wood')
+        print ('Suction cups gripping wood')
         time.sleep(1)
     def on_position2_ready_to_place(self):
-        print ('G: Transporter at endswitch 2, manipulator ready to place wood')
+        print ('Transporter at endswitch 2, manipulator ready to place wood')
         time.sleep(1)
     def on_pressure_deactivated(self):
-        print ('G: Pressure deactivated, suction cups lifted ')
+        print ('Pressure deactivated, suction cups lifted ')
         time.sleep(1)
     def on_tray_hidden(self):
-        print ('G: Tray hidden successfully ')
+        print ('Tray hidden successfully ')
         time.sleep(1)
     def on_tray_blocked_extending(self):
-        print ('G: Tray blocked, attempting to unlock ')
+        print ('Tray blocked, attempting to unlock ')
         time.sleep(1)
     def on_pressure_failure1(self):
-        print('G: Insufficient pressure, manual maintenance required ')
+        print('Insufficient pressure, manual maintenance required ')
         time.sleep(1)
     def on_pressure_failure2(self):
-        print('G: Insufficient pressure, manual maintenance required ')
+        print('Insufficient pressure, manual maintenance required ')
         time.sleep(1)
     def on_tray_blocked_hiding(self):
-        print('G: Hiding tray unsuccessful, attempting to unlock ')
+        print('Hiding tray unsuccessful, attempting to unlock ')
         time.sleep(1)
     def on_gripper_error_handled(self):
-        n = input("G: Confirm pressure circuit maintanance (y): ")
+        n = input("Confirm pressure circuit maintanance (y): ")
         if n == "y":
-            print('G: Pressure maintenance confirmed ')
+            print('Pressure maintenance confirmed ')
         time.sleep(1)
-
 
     def on_robot_failure(self):
-        print("G: Restart gripper because of robot error")
+        print("Restart gripper because of robot error")
         time.sleep(1)
-
 
     def process(self):
         licznik = 0
@@ -82,7 +83,7 @@ class WoodGripper(StateMachine):
             licznik = 1
 
         while licznik == 1:
-            n = input("G: Choose tray behavior: (a - tray extended correctly, b - tray blocked while extending): ")
+            n = input("Choose tray behavior: (a - tray extended correctly, b - tray blocked while extending): ")
             if n == 'a':
                 self.tray_extended()
                 licznik = 2
@@ -127,4 +128,35 @@ class WoodGripper(StateMachine):
             self.gripper_error_handled()
             licznik = 0
 
+    def build_gripper_graph(self):
+        nodes_gripper = []
+        edges_gripper = []
+        G = nx.MultiDiGraph()
+        states = self.states
+        for state in states:
+            nodes_gripper.append(state.value)
+        transitions = self.transitions
+        for transition in transitions:
+            for dests in transition.destinations:
+                edges_gripper.append([transition.source.value, dests.value])
+        print(nodes_gripper)
+        #print(edges_gripper)
+        G.add_nodes_from(nodes_gripper)
+        G.add_edges_from(edges_gripper)
+        self.__graph = G
 
+    def draw_gripper_graph(self):
+        nx.planar_layout(self.__graph)
+        nx.draw_circular(self.__graph, with_labels=True, font_weight='bold')
+        print("List of self loops:" + str(list(nx.nodes_with_selfloops(self.__graph))))
+        plt.show()
+
+    def analyze_gripper_graph(self, start_node, end_node):
+        if start_node in self.__graph.nodes and end_node in self.__graph.nodes:
+            if nx.has_path(self.__graph, start_node, end_node):
+                print("Path between " + str(start_node) + " and " + str(end_node) + " exists")
+                print("Path between " + str(start_node) + " and " + str(end_node) + " is: " + str(nx.shortest_path(self.__graph, start_node, end_node)))
+            else:
+                print("Path between nodes doesn't exist")
+        else:
+            print("Invalid nodes provided")

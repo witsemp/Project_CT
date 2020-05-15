@@ -1,7 +1,11 @@
 from statemachine import StateMachine, State
 import time
+import networkx as nx
+import matplotlib.pyplot as plt
+
 
 class RobotPlatform(StateMachine):
+    __graph = nx.MultiDiGraph()
     #List of states
     Robot_Idle = State("Waiting to begin sequence ", initial=True)
     Lowering_Arm_To_Pickup = State("Lowering arm to pick up wood ")
@@ -33,49 +37,49 @@ class RobotPlatform(StateMachine):
     gripper_error = Gripper_Activation.to(Robot_Idle)
 
     def on_wood_detected(self):
-        print('R: Wood detected, lowering arm to pickup wood ')
+        print('Wood detected, lowering arm to pickup wood ')
         time.sleep(1)
     def on_manipulator_lowered_to_pickup(self):
-        print('R: Manipulator lowered ')
+        print('Manipulator lowered ')
         time.sleep(1)
     def on_gripper_activated(self):
-        print('R: Manipulator lifted with wood ')
+        print('Manipulator lifted with wood ')
         time.sleep(1)
     def on_manipulator_lowered_to_place(self):
-        print('R: Manipulator lowered to place ')
+        print('Manipulator lowered to place ')
         time.sleep(1)
     def on_rotated_endswitch_2(self):
-        print("R: Manipulator rotated, platform at endswitch 2 ")
+        print("Manipulator rotated, platform at endswitch 2 ")
         time.sleep(1)
     def on_gripper_deactivated(self):
-        print('R: Suction cups deactivated')
+        print('Suction cups deactivated')
         time.sleep(1)
     def on_manipulator_lifted_wo_wood(self):
-        print('R: Manipulator in upper position, without wood ')
+        print('Manipulator in upper position, without wood ')
         time.sleep(1)
     def on_rotated_endswitch_1(self):
-        print('R: Manipulator rotated, platform at endswitch 1 ')
+        print('Manipulator rotated, platform at endswitch 1 ')
         time.sleep(1)
     def on_endswitch2_no_confirmation(self):
-        print("R: Awaiting confirmation from endswitch 2 ")
+        print("Awaiting confirmation from endswitch 2 ")
         time.sleep(1)
     def on_endswitch1_no_confirmation(self):
-        print("R: Awaiting confirmation from endswitch 1 ")
+        print("Awaiting confirmation from endswitch 1 ")
         time.sleep(1)
     def on_endswitch2_error(self):
-        print("R: No confirmation from endswitch 2 ")
+        print("No confirmation from endswitch 2 ")
         time.sleep(1)
     def on_endswitch1_error(self):
-        print("R: No confirmation from endswitch 1 ")
+        print("No confirmation from endswitch 1 ")
         time.sleep(1)
     def on_endswitch_error_confirmed(self):
-        n=input("R: Endswitch repair and confirmation needed (y) - confirm maintenance: ")
+        n=input("Endswitch repair and confirmation needed (y) - confirm maintenance: ")
         if n == "y":
-            print("R: Maintenance confirmed ")
+            print("Maintenance confirmed ")
         time.sleep(1)
 
     def on_gripper_error(self):
-        print("R: Restart robot because of gripper error")
+        print("Restart robot because of gripper error")
         time.sleep(1)
 
     def process(self):
@@ -126,3 +130,37 @@ class RobotPlatform(StateMachine):
         if counter == 90:
             self.endswitch_error_confirmed()
             counter = 0
+
+    def build_robot_graph(self):
+        nodes_robot = []
+        edges_robot = []
+        G = nx.MultiDiGraph()
+        states = self.states
+        for state in states:
+            nodes_robot.append(state.value)
+        transitions = self.transitions
+        for transition in transitions:
+            for dests in transition.destinations:
+                edges_robot.append([transition.source.value, dests.value])
+        print(nodes_robot)
+        #print(edges_robot)
+        G.add_nodes_from(nodes_robot)
+        G.add_edges_from(edges_robot)
+        G.remove_edge('Gripper_Activation', 'Robot_Idle')
+        self.__graph = G
+
+    def draw_robot_graph(self):
+        nx.planar_layout(self.__graph)
+        nx.draw_circular(self.__graph, with_labels=True, font_weight='bold')
+        print("List of self loops:" + str(list(nx.nodes_with_selfloops(self.__graph))))
+        plt.show()
+
+    def analyze_robot_graph(self, start_node, end_node):
+        if start_node in self.__graph.nodes and end_node in self.__graph.nodes:
+            if nx.has_path(self.__graph, start_node, end_node):
+                print("Path between " + str(start_node) + " and " + str(end_node) + " exists")
+                print("Path between " + str(start_node) + " and " + str(end_node) + " is: " + str(nx.shortest_path(self.__graph, start_node, end_node)))
+            else:
+                print("Path between nodes doesn't exist")
+        else:
+            print("Invalid nodes provided")
